@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Zipkin Tracing with Apache Cassandra – The Last Pickle</title>
+
+		<meta name="description" content="Apache Cassandra positioned as the data platform de jure for the next evolution of software service amidst an enterprise moving ever towards microservices and BASE architectures the missing piece for many is tracing and profiling difficult to reproduce problems.">
+
+		<meta name="author" content="Mick Semb Wever">
+		<meta name="license" content="Creative Commons Attribution-NonCommercial 3.0">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/tlp.css" id="theme">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+                <section>
+                    <section >
+                        <h2>Zipkin Tracing<br/>Apache Cassandra</h2>
+                        <img src="tlp/TLP_mick.png" />
+                    </section>
+                    <section >
+                        <h6 style="text-align: left;">About The Last Pickle</h6>
+                        <h3><br/>
+                            Work with clients<br/>
+                            to deliver and improve<br/></h3>
+                            <h4>Apache Cassandra based solutions<br/><br/></h4>
+                            <h4>Based in<br/> USA, New Zealand, Australia</h4>
+                    </section>
+                </section>
+
+                <section>
+                    <section>
+                        <p>microservices - devOps - distributed tracing</p>
+                        <p>zipkin</p>
+                        <p>zipkin & cassandra</p>
+                    </section>
+				    <section>
+					    <p>Apache Cassandra the data platform de jure<br/>for the next evolution of software services</p><br/>
+                        <p><em>an enterprise moving ever towards<br/>microservices and BASE architectures</em></p><br/>
+                        <p>the missing piece for many is tracing and profiling difficult to reproduce problems</p>
+				    </section>
+                </section>
+
+                <section>
+				    <section>
+					    <h2>Scaling Data</h2>
+                        <br/>
+					    <p>
+						    Apache Cassandra<br/>data platform de jure<br/>next evolution of software services
+					    </p>
+				    </section>
+                </section>
+
+                <section>
+				    <section>
+					    <h2>Scaling People</h2>
+                        <br/>
+					    <p>
+						    an enterprise moving ever towards<br/>microservices and BASE architectures
+					    </p>
+					    <p>
+    					    <img data-src="microservices.png" width="400" />
+                        </p>
+				    </section>
+				    <section data-transition="none">
+					    <p>
+    					    <img data-src="kibana-grafana-distributed_tracing.png" width="700" />
+                        </p>
+				    </section>
+				    <section data-transition="none">
+					    <p>
+    					    <img data-src="kibana-grafana-zipkin.png" width="700" />
+					    </p>
+				    </section>
+				    <section>
+					    <h2>architectural safety</h2>
+                        <br/>
+                        <ul>
+                            <li>zero exceptions</li>
+                            <li>spot problems first</li>
+                            <li>stable master</li>
+                            <li>no user left out</li>
+                            <li>plug-n-play services</li>
+                        </ul>
+				    </section>
+                </section>
+
+                <section>
+				    <section>
+					    <h2></h2>
+                        <br/>
+					    <p>
+						   tracing and profiling difficult to reproduce problems
+					    </p>
+				    </section>
+				    <section>
+					    <h2>Zipkin</h2>
+                        <br/>
+					    <p>
+						    an implementation of Google's Dapper paper
+					    </p>
+				    </section>
+				    <section>
+					    <h6>search traces</h6>
+                        <br/>
+					    <img data-src="Screenshot-zipkin-search-0.png" />
+				    </section>
+				    <section data-background-size="100%" data-background="Screenshot-zipkin-search-0.png"  data-background-transition="zoom">
+				    </section>
+				    <section data-background-size="100%" data-background="Screenshot-zipkin-search-1.png"  data-background-transition="zoom">
+				    </section>
+				    <section data-background-size="100%" data-background="Screenshot-zipkin-search-2.png"  data-background-transition="zoom">
+				    </section>
+				    <section>
+					    <h6>analyse one trace</h6>
+                        <br/>
+					    <img data-src="zipkin-trace.png" />
+				    </section>
+				    <section data-background-size="100%" data-background="zipkin-trace.png"  data-background-transition="zoom">
+				    </section>
+				    <section>
+					    <h6>realtime in browser</h6>
+                        <br/>
+					    <img data-src="zipkin-firebug.png" />
+				    </section>
+				    <section data-background-size="100%" data-background="zipkin-firebug.png"  data-background-transition="zoom">
+				    </section>
+				    <section>
+					    <h6>platform call graph</h6>
+                        <br/>
+					    <img data-src="zipkin-graph.png" />
+				    </section>
+				    <section data-background-size="100%" data-background="zipkin-graph-1.png"  data-background-transition="zoom">
+				    </section>
+				    <section><h4>client&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;server</h4>
+					    <p>
+                            <br/><br/>
+						    CS  -->&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--> SR<br/><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-- SS<br/>
+                            CR  &lt;--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+				    </section>
+				    <section>
+                        <br/>
+					    <img data-src="architecture-0.png" />
+				    </section>
+			    </section>
+			    <section >
+				    <section data-transition="none">
+                        <h4>simple http call</h4>
+                        <br/>
+                        <table width="100%"><tr ><td ><img data-src="simple-no-trace.png"></td></tr></table>
+
+				    </section>
+				    <section data-transition="none">
+                        <h4>simple http call</h4>
+                        <br/>
+                        <table width="100%"><tr ><td ><img data-src="simple-cs-cr.png"></td></tr></table>
+
+				    </section>
+				    <section data-transition="none">
+                        <h4>simple c* call</h4>
+                        <br/>
+                        <table width="100%" ><tr ><td ><img data-src="simple-no-trace-cassandra.png" ></td></tr></table>
+
+				    </section>
+				    <section data-transition="none">
+                        <h4>simple c* call</h4>
+                        <br/>
+                        <table width="100%" ><tr ><td ><img data-src="simple-cs-cr-cassandra.png" ></td></tr></table>
+
+				    </section>
+				    <section >
+                        <h4>http call passing through headers</h4>
+                        <br/>
+                        <table ><tr ><td ><img data-src="cs-cr-with-headers.png" ></td></tr></table>
+
+				    </section>
+                </section>
+
+                <section>
+				    <section>
+					    <h2>Tracing in C*</h2>
+					    <img data-src="Screenshot-CASSANDRA-1123.png" />
+				    </section>
+				    <section data-background-size="100%" data-background="c-tracing.png" data-background-transition="zoom">
+				    </section>
+				    <section>
+					    <img data-src="tracing-package.png" />
+				    </section>
+				    <section>
+                        <pre><code>    CO-ORDINATOR NODE                    REPLICA NODE
+
+
+ -->
+    beginSession(..)
+        trace(..)
+        trace(..)
+                                    --> initialiseMessage(..)
+                                            trace(..)
+                                            trace(..)
+                                    &lt;--
+        trace(..)
+    endSession(..)
+ &lt;--
+                        </code></pre>
+				    </section>
+                </section>
+
+                <section>
+				    <section>
+					    <h3>Zipkin <em>in</em> C*</h3>
+                        <br/>
+                        <ul>
+                            <li>visualisation</li>
+                            <li>detailed timings</li>
+                            <li>hierarchy and asynchronisity</li>
+                            <li>zero tracing overhead</li>
+                        </ul>
+				    </section>
+                    <section >
+                        <img data-src="zipkin-single-node.png"/>
+				    </section>
+                    <section data-background-size="100%" data-background="zipkin-single-node.png" data-background-transition="zoom">
+				    </section>
+				    <section>
+                        Two classes to override
+                        <pre><code>
+public class ZipkinTracing extends Tracing
+{..}
+
+public class ZipkinTraceState extends TraceState
+{..}
+</code></pre>
+                        <br/><br/>
+                        then run enabling new tracing
+                        <pre><code>bin/cassandra -Dcassandra.custom_tracing_class=..ZipkinTracing</code></pre>
+				    </section>
+                </section>
+
+                <section>
+				    <section>
+					    <h3>Zipkin <em>across</em> C*</h3>
+                        <br/>
+					    <p>
+
+					    </p>
+				    </section>
+				    <section>
+					    <h3>Zipkin <em>across</em> C*</h3>
+                        <pre><code>    CO-ORDINATOR NODE                    REPLICA NODE
+
+
+ -->
+    beginSession(..)
+        trace(..)
+        trace(..)
+                   (zipkin headers) --> initialiseMessage(..)
+                                            trace(..)
+                                            trace(..)
+                                    &lt;--
+        trace(..)
+    endSession(..)
+ &lt;--
+                        </code></pre>
+				    </section>
+                    <section >
+					    <h3>Zipkin <em>across</em> C*</h3>
+                        <img data-src="zipkin-ccm.png"/>
+				    </section>
+                    <section data-background-size="100%" data-background="zipkin-ccm.png" data-background-transition="zoom">
+				    </section>
+                </section>
+
+                <section>
+				    <section>
+					    <h3>Zipkin <em>into</em> C*</h3>
+                        <br/>
+					    <p>
+					    </p>
+				    </section>
+                    <section>
+					    <h3>Zipkin <em>into</em> C*</h3>
+                        <br/>
+                        <img data-src="zipkin-full-stack-trace.png"/>
+				    </section>
+                    <section data-background-size="100%" data-background="zipkin-full-stack-trace-zoom.png" data-background-transition="zoom">
+				    </section>
+				    <section>
+					    <h2>to the rescue</h2>
+                        <img data-src="CASSANDRA-8553.png"/>
+				    </section>
+				    <section data-transition="none">
+                        <h4>http call passing through headers</h4>
+                        <br/><br/><br/>
+                        <table width="100%"><tr ><td ><img data-src="cs-cr-with-headers.png" ></td></tr></table>
+				    </section>
+				    <section data-transition="none">
+                        <h4>c* call using custom payload</h4>
+                        <br/>
+                        <table width="100%"><tr ><td ><img data-src="cs-cr-with-payload-cassandra.png" ></td></tr></table>
+				    </section>
+				    <section >
+                        <br/><br/>
+                        enable zipkin tracing <em>and</em> the custom payload handler
+                        <br/><br/>
+                        <pre><code style="font-size: 85%;">bin/cassandra
+    -Dcassandra.custom_tracing_class=..ZipkinTracing
+    -Dcassandra.custom_query_handler_class=..CustomPayloadMirroringQueryHandler</code></pre>
+				    </section>
+
+				    <section >
+                        <br/><br/>
+                        the patch?
+                        <br/><br/>
+                        <pre><code style="font-size: 85%;">src/java/org/apache/cassandra/net/MessageOut.java                   |  7 +------
+src/java/org/apache/cassandra/net/OutboundTcpConnection.java        |  4 +++-
+src/java/org/apache/cassandra/service/QueryState.java               | 12 ++++++++++--
+src/java/org/apache/cassandra/transport/messages/ExecuteMessage.java|  2 +-
+4 file changed, 15 insertion(+), 10 deletion(-)</code></pre>
+				    </section>
+                </section>
+
+                <section>
+				    <section>
+					    <h2>what else?</h2>
+                        <br/>
+                        <ul>
+                            <li>anti-entropy repair</li>
+                            <li>compaction</li>
+                        </ul>
+				    </section>
+                </section>
+
+                <section>
+                    <section >
+                        <h2>Thanks</h2>
+                            <ul>
+                                <li style="font-size: 60%;">Zipkin &nbsp;&nbsp;&nbsp;&nbsp;– https://github.com/openzipkin/zipkin</li><br/>
+                                <li style="font-size: 60%;">Brave (zipkin java instrumentation)
+                                    <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;– https://github.com/openzipkin/brave</li><br/>
+                                <li style="font-size: 60%;">C* patch for pluggable tracing
+                                    <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;– https://issues.apache.org/jira/browse/CASSANDRA-10392</li><br/>
+                                <li style="font-size: 60%;">Zipkin Cassandra implementation
+                                    <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;– https://github.com/thelastpickle/cassandra-zipkin-tracing</li><br/>
+                                <li style="font-size: 60%;">Google's Dapper paper
+                                    <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;– http://research.google.com/pubs/pub36356.html</li><br/>
+                                <li style="font-size: 60%;">C* custom payloads
+                                    <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;– https://issues.apache.org/jira/browse/CASSANDRA-8553
+                                    <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;– https://datastax.github.io/java-driver/2.2.0-rc2/features/custom_payloads/</li>
+                            </ul>
+                    </section>
+                    <section >
+                        <img src="tlp/TLP_mick.png" />
+                    </section>
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'convex', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
