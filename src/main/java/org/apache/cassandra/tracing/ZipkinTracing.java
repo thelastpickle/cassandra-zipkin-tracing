@@ -1,5 +1,5 @@
 
-package org.apache.cassandra.tracing;
+package com.thelastpickle.cassandra.tracing;
 
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.ClientTracer;
@@ -15,6 +15,7 @@ import com.twitter.zipkin.gen.Span;
 import org.apache.cassandra.net.MessageIn;
 import org.apache.cassandra.config.DatabaseDescriptor;
 import org.apache.cassandra.utils.FBUtilities;
+import org.apache.cassandra.utils.UUIDGen;
 import org.apache.thrift.TException;
 import org.apache.thrift.TSerializer;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -40,7 +41,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class ZipkinTracing extends TracingImpl
+public final class ZipkinTracing extends Tracing
 {
     public static final String ZIPKIN_TRACE_HEADERS = "zipkin";
 
@@ -97,7 +98,7 @@ public final class ZipkinTracing extends TracingImpl
     }
 
     @Override
-    public void stopSession()
+    protected void stopSessionImpl()
     {
         ZipkinTraceState state = (ZipkinTraceState) get();
         if (state != null)
@@ -106,7 +107,6 @@ public final class ZipkinTracing extends TracingImpl
             getServerTracer().setServerSend();
             getServerTracer().clearCurrentSpan();
         }
-        super.stopSession();
     }
 
     @Override
@@ -124,7 +124,7 @@ public final class ZipkinTracing extends TracingImpl
     {
         getServerTracer().submitBinaryAnnotation("client", client.toString());
         getServerTracer().submitBinaryAnnotation("request", request);
-        return super.begin(request, client, parameters);
+        return get();
     }
 
     @Override
@@ -151,6 +151,14 @@ public final class ZipkinTracing extends TracingImpl
                         ZIPKIN_TRACE_HEADERS,
                         ByteBuffer.allocate(16).putLong(span.getTrace_id()).putLong(span.getId()).array())
                 .build();
+    }
+
+    @Override
+    public void trace(final ByteBuffer sessionId, final String message, final int ttl)
+    {
+        UUID sessionUuid = UUIDGen.getUUID(sessionId);
+        TraceState state = Tracing.instance.get(sessionUuid);
+        state.trace(message);
     }
 
     @Override

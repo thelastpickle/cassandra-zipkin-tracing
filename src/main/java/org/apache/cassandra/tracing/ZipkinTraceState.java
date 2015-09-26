@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.cassandra.tracing;
+package com.thelastpickle.cassandra.tracing;
 
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.ClientTracer;
@@ -23,6 +23,9 @@ import com.github.kristofa.brave.SpanCollector;
 import com.github.kristofa.brave.ServerSpan;
 import com.twitter.zipkin.gen.Annotation;
 import com.twitter.zipkin.gen.Span;
+import org.apache.cassandra.tracing.TraceStateImpl;
+import org.apache.cassandra.tracing.Tracing;
+
 import java.net.InetAddress;
 import java.util.Deque;
 import java.util.UUID;
@@ -34,7 +37,7 @@ import java.util.concurrent.TimeUnit;
  * ThreadLocal state for a tracing session. The presence of an instance of this class as a ThreadLocal denotes that an
  * operation is being traced.
  */
-final class ZipkinTraceState extends TraceStateImpl
+final class ZipkinTraceState extends TraceState
 {
     private final ClientTracer clientTracer;
     private final SpanCollector spanCollector;
@@ -76,8 +79,6 @@ final class ZipkinTraceState extends TraceStateImpl
 
     private void traceImplWithSpans(String message)
     {
-        long startTime = System.currentTimeMillis() * 1000 + (TimeUnit.NANOSECONDS.toMicros(System.nanoTime()) % 1000);
-
         Brave.getServerSpanThreadBinder().setCurrentSpan(serverSpan);
         if (null != previous.get())
         {
@@ -89,7 +90,6 @@ final class ZipkinTraceState extends TraceStateImpl
         Span prev = Brave.getClientSpanThreadBinder().getCurrentClientSpan();
         previous.set(prev);
         openSpans.addLast(prev);
-        super.traceImpl(message);
     }
 
     private void traceImplUsingAnnotations(String message)
@@ -103,6 +103,5 @@ final class ZipkinTraceState extends TraceStateImpl
         {
             serverSpan.getSpan().addToAnnotations(annotation);
         }
-        super.traceImpl(message);
     }
 }
