@@ -18,8 +18,6 @@
 package com.thelastpickle.cassandra.tracing;
 
 import com.github.kristofa.brave.Brave;
-import com.github.kristofa.brave.ClientTracer;
-import com.github.kristofa.brave.SpanCollector;
 import com.github.kristofa.brave.ServerSpan;
 import com.twitter.zipkin.gen.Annotation;
 import com.twitter.zipkin.gen.Span;
@@ -39,66 +37,95 @@ import java.util.concurrent.TimeUnit;
  */
 final class ZipkinTraceState extends TraceState
 {
-    private final ClientTracer clientTracer;
-    private final SpanCollector spanCollector;
+    private final Brave brave;
     private final ServerSpan serverSpan;
 
     private final Deque<Span> openSpans = new ConcurrentLinkedDeque();
-    private final ThreadLocal<Span> previous = new ThreadLocal<>();
+    private final ThreadLocal<Span> currentSpan = new ThreadLocal<>();
 
     public ZipkinTraceState(
+            Brave brave,
             InetAddress coordinator,
             UUID sessionId,
             Tracing.TraceType traceType,
-            ServerSpan serverSpan,
-            ClientTracer clientTracer,
-            SpanCollector spanCollector)
+            ServerSpan serverSpan)
     {
         super(coordinator, sessionId, traceType);
         assert null != serverSpan;
+        this.brave = brave;
         this.serverSpan = serverSpan;
-        this.clientTracer = clientTracer;
-        this.spanCollector = spanCollector;
     }
 
+    @Override
     protected void traceImpl(String message)
     {
-        traceImplWithSpans(message);
+        traceImplWithClientSpans(message);
     }
 
     void close()
     {
-        Brave.getServerSpanThreadBinder().setCurrentSpan(serverSpan);
-        for (Span span : openSpans)
-        {
-            Brave.getClientSpanThreadBinder().setCurrentSpan(span);
-            clientTracer.setClientReceived();
-        }
-        openSpans.clear();
+        brave.serverSpanThreadBinder().setCurrentSpan(serverSpan);
+        closeClientSpans();
     }
 
-    private void traceImplWithSpans(String message)
+    private void traceImplWithClientSpans(String message)
     {
-        Brave.getServerSpanThreadBinder().setCurrentSpan(serverSpan);
-        if (null != previous.get())
+        brave.serverSpanThreadBinder().setCurrentSpan(serverSpan);
+        if (null != currentSpan.get())
         {
-            clientTracer.setClientReceived();
-            openSpans.remove(previous.get());
+            brave.clientTracer().setClientReceived();
+            openSpans.remove(currentSpan.get());
+            currentSpan.remove();
         }
-        clientTracer.startNewSpan(message + " [" + Thread.currentThread().getName() + "]");
-        clientTracer.setClientSent();
-        Span prev = Brave.getClientSpanThreadBinder().getCurrentClientSpan();
-        previous.set(prev);
+        brave.clientTracer().startNewSpan(message + " [" + Thread.currentThread().getName() + "]");
+        brave.clientTracer().setClientSent();
+        Span prev = brave.clientSpanThreadBinder().getCurrentClientSpan();
+        currentSpan.set(prev);
         openSpans.addLast(prev);
+    }
+
+    private void closeClientSpans()
+    {
+        for (Span span : openSpans)
+        {
+            brave.clientSpanThreadBinder().setCurrentSpan(span);
+            brave.localTracer().finishSpan();
+        }
+        openSpans.clear();
+        currentSpan.remove();
+    }
+
+    private void traceImplWithLocalSpans(String message)
+    {
+//        brave.serverSpanThreadBinder().setCurrentSpan(serverSpan);
+//        if (null != currentSpan.get())
+//        {
+//            brave.localTracer().finishSpan();
+//            openSpans.remove(currentSpan.get());
+//            currentSpan.remove();
+//        }
+//        brave.localTracer().startNewSpan("jvm", message + " [" + Thread.currentThread().getName() + "]");
+//        Span prev = brave.localSpanThreadBinder().getCurrentClientSpan();
+//        currentSpan.set(prev);
+//        openSpans.addLast(prev);
+    }
+
+    private void closeLocalSpans()
+    {
+//        for (Span span : openSpans)
+//        {
+//            brave.localSpanThreadBinder().setCurrentSpan(span);
+//            brave.localTracer().finishSpan();
+//        }
+//        openSpans.clear();
+//        currentSpan.remove();
     }
 
     private void traceImplUsingAnnotations(String message)
     {
         long startTime = System.currentTimeMillis() * 1000 + (TimeUnit.NANOSECONDS.toMicros(System.nanoTime()) % 1000);
 
-        Annotation annotation = new Annotation();
-        annotation.setTimestamp(startTime);
-        annotation.setValue(message);
+        Annotation annotation = Annotation.create(startTime, message, null);
         synchronized (serverSpan.getSpan())
         {
             serverSpan.getSpan().addToAnnotations(annotation);
