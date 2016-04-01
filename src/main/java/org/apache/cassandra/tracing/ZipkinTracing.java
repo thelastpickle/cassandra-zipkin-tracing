@@ -14,6 +14,8 @@ import com.twitter.zipkin.gen.BinaryAnnotation;
 import com.twitter.zipkin.gen.Span;
 import org.apache.cassandra.net.MessageIn;
 import org.apache.cassandra.config.DatabaseDescriptor;
+import org.apache.cassandra.tracing.TraceState;
+import org.apache.cassandra.tracing.Tracing;
 import org.apache.cassandra.utils.FBUtilities;
 import org.apache.cassandra.utils.UUIDGen;
 import org.apache.thrift.TException;
@@ -22,7 +24,6 @@ import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
-import org.apache.commons.codec.binary.Base64;
 import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,7 @@ import scribe.thrift.scribe;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
@@ -255,7 +257,7 @@ public final class ZipkinTracing extends Tracing
 
         private LogEntry create(final Span span) throws TException
         {
-            final String spanAsString = new Base64().encodeToString(spanToBytes(span));
+            final String spanAsString = Base64.getEncoder().encodeToString(spanToBytes(span));
             return new LogEntry("zipkin", spanAsString);
         }
 

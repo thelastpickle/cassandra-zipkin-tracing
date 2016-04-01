@@ -23,7 +23,7 @@ import com.github.kristofa.brave.SpanCollector;
 import com.github.kristofa.brave.ServerSpan;
 import com.twitter.zipkin.gen.Annotation;
 import com.twitter.zipkin.gen.Span;
-import org.apache.cassandra.tracing.TraceStateImpl;
+import org.apache.cassandra.tracing.TraceState;
 import org.apache.cassandra.tracing.Tracing;
 
 import java.net.InetAddress;
