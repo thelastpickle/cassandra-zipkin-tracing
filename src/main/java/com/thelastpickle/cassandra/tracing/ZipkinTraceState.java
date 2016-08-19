@@ -40,7 +40,7 @@ final class ZipkinTraceState extends TraceState
     private final Brave brave;
     private final ServerSpan serverSpan;
 
-    private final Deque<Span> openSpans = new ConcurrentLinkedDeque();
+    final Deque<Span> openSpans = new ConcurrentLinkedDeque();
     private final ThreadLocal<Span> currentSpan = new ThreadLocal<>();
 
     public ZipkinTraceState(

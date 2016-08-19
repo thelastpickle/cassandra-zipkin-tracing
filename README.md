@@ -35,10 +35,7 @@ Then in the application code where the DataStax CQL driver is used put the Zipki
 
     SpanId spanId = clientTracer.startNewSpan(statement.toString());
 
-    ByteBuffer traceHeaders = ByteBuffer.allocate(24);
-    traceHeaders.putLong(spanId.getTraceId));
-    traceHeaders.putLong(spanId.getSpanId());
-    traceHeaders.putLong(spanId.getParentSpanId());
+    ByteBuffer traceHeaders = ByteBuffer.wrap(spanId.bytes());
 
     statement.setOutgoingPayload(singletonMap("zipkin", traceHeaders.array()));
 

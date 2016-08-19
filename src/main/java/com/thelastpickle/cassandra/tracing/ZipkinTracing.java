@@ -6,8 +6,8 @@ import com.github.kristofa.brave.ClientTracer;
 import com.github.kristofa.brave.EmptySpanCollectorMetricsHandler;
 import com.github.kristofa.brave.FixedSampleRateTraceFilter;
 import com.github.kristofa.brave.ServerTracer;
-import com.github.kristofa.brave.ServerSpanThreadBinder;
 import com.github.kristofa.brave.SpanCollector;
+import com.github.kristofa.brave.SpanId;
 import com.github.kristofa.brave.TraceFilter;
 import com.github.kristofa.brave.http.HttpSpanCollector;
 import com.google.common.collect.ImmutableMap;
@@ -33,33 +33,32 @@ public final class ZipkinTracing extends Tracing
 {
     public static final String ZIPKIN_TRACE_HEADERS = "zipkin";
 
+    static final int SAMPLE_RATE = 1;
+
     private static final Logger logger = LoggerFactory.getLogger(ZipkinTracing.class);
 
     private static final String HTTP_SPAN_COLLECTOR_HOST = System.getProperty("ZipkinTracing.httpCollectorHost", "127.0.0.1");
     private static final String HTTP_SPAN_COLLECTOR_PORT = System.getProperty("ZipkinTracing.httpCollectorPort", "9411");
     private static final String HTTP_COLLECTOR_URL = "http://" + HTTP_SPAN_COLLECTOR_HOST + ':' + HTTP_SPAN_COLLECTOR_PORT;
 
-    private volatile SpanCollector spanCollector
+    private final SpanCollector spanCollector
             = HttpSpanCollector.create(HTTP_COLLECTOR_URL, new EmptySpanCollectorMetricsHandler());
             //= KafkaSpanCollector.create("127.0.0.1:9092", new EmptySpanCollectorMetricsHandler());
 
-    private final int SAMPLE_RATE = 1;
 
     private final List<TraceFilter> traceFilters
             // Sample rate = 1 means every request will get traced.
             = Collections.singletonList(new FixedSampleRateTraceFilter(SAMPLE_RATE));
 
-    private final Brave brave = new Brave
+    volatile Brave brave = new Brave
             .Builder( "c*:" + DatabaseDescriptor.getClusterName() + ":" + FBUtilities.getBroadcastAddress().getHostName())
             .spanCollector(spanCollector)
             .traceFilters(traceFilters)
             .build();
 
-    private final ServerSpanThreadBinder serverSpanThreadBinder;
 
     public ZipkinTracing()
     {
-        this.serverSpanThreadBinder = brave.serverSpanThreadBinder();
     }
 
     ClientTracer getClientTracer()
@@ -87,11 +86,7 @@ public final class ZipkinTracing extends Tracing
         {
             if (isValidHeaderLength(bb.limit()))
             {
-                getServerTracer().setStateCurrentTrace(
-                        bb.getLong(),
-                        bb.getLong(),
-                        24 <= bb.limit() ? bb.getLong() : null,
-                        traceType.name());
+                extractAndSetSpan(bb.array(), traceType.name());
             }
             else
             {
@@ -131,7 +126,8 @@ public final class ZipkinTracing extends Tracing
     @Override
     public TraceState begin(String request, InetAddress client, Map<String, String> parameters)
     {
-        getServerTracer().submitBinaryAnnotation("client", client.toString());
+        if (null != client)
+            getServerTracer().submitBinaryAnnotation("client", client.toString());
         getServerTracer().submitBinaryAnnotation("request", request);
         return get();
     }
@@ -141,20 +137,14 @@ public final class ZipkinTracing extends Tracing
     {
         byte [] bytes = message.parameters.get(ZIPKIN_TRACE_HEADERS);
 
-        assert null == bytes || 16 == bytes.length || 24 == bytes.length
+        assert null == bytes || isValidHeaderLength(bytes.length)
                 : "invalid customPayload in " + ZIPKIN_TRACE_HEADERS;
 
         if (null != bytes)
         {
             if (isValidHeaderLength(bytes.length))
             {
-                ByteBuffer bb = ByteBuffer.wrap(bytes);
-
-                getServerTracer().setStateCurrentTrace(
-                        bb.getLong(),
-                        bb.getLong(),
-                        24 <= bb.limit() ? bb.getLong() : null,
-                        message.getMessageType().name());
+                extractAndSetSpan(bytes, message.getMessageType().name());
             }
             else
             {
@@ -164,21 +154,41 @@ public final class ZipkinTracing extends Tracing
         return super.initializeFromMessage(message);
     }
 
+    private void extractAndSetSpan(byte[] bytes, String name) {
+        if (32 == bytes.length)
+        {
+            // Zipkin B3 propagation
+            SpanId spanId = SpanId.fromBytes(bytes);
+            getServerTracer().setStateCurrentTrace(spanId.traceId, spanId.spanId, spanId.parentId, name);
+        }
+        else
+        {
+            // deprecated aproach
+            ByteBuffer bb = ByteBuffer.wrap(bytes);
+
+            getServerTracer().setStateCurrentTrace(
+                    bb.getLong(),
+                    bb.getLong(),
+                    24 <= bb.limit() ? bb.getLong() : null,
+                    name);
+        }
+    }
+
     @Override
     public Map<String, byte[]> getTraceHeaders()
     {
         assert isTracing();
         Span span = brave.clientSpanThreadBinder().getCurrentClientSpan();
 
+        SpanId spanId = SpanId.builder()
+                .traceId(span.getTrace_id())
+                .parentId(span.getParent_id())
+                .spanId(span.getId())
+                .build();
+
         return ImmutableMap.<String, byte[]>builder()
                 .putAll(super.getTraceHeaders())
-                .put(
-                        ZIPKIN_TRACE_HEADERS,
-                        ByteBuffer.allocate(24)
-                                .putLong(span.getTrace_id())
-                                .putLong(span.getId())
-                                .putLong(span.getParent_id())
-                                .array())
+                .put(ZIPKIN_TRACE_HEADERS, spanId.bytes())
                 .build();
     }
 
@@ -203,11 +213,11 @@ public final class ZipkinTracing extends Tracing
                 coordinator,
                 sessionId,
                 traceType,
-                serverSpanThreadBinder.getCurrentServerSpan());
+                brave.serverSpanThreadBinder().getCurrentServerSpan());
     }
 
     private static boolean isValidHeaderLength(int length)
     {
-        return 16 == length || 24 == length;
+        return 16 == length || 24 == length || 32 == length;
     }
 }
