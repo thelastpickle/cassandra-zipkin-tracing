@@ -40,6 +40,10 @@ final class ZipkinTraceState extends TraceState
     private final Brave brave;
     private final ServerSpan serverSpan;
 
+    // re-using property from TraceStateImpl.java
+    private static final int WAIT_FOR_PENDING_EVENTS_TIMEOUT_SECS =
+      Integer.valueOf(System.getProperty("cassandra.wait_for_tracing_events_timeout_secs", "1"));
+
     final Deque<Span> openSpans = new ConcurrentLinkedDeque();
     private final ThreadLocal<Span> currentSpan = new ThreadLocal<>();
 
@@ -129,6 +133,22 @@ final class ZipkinTraceState extends TraceState
         synchronized (serverSpan.getSpan())
         {
             serverSpan.getSpan().addToAnnotations(annotation);
+        }
+    }
+
+    @Override
+    protected void waitForPendingEvents() {
+        int sleepTime = 100;
+        int maxAttempts = WAIT_FOR_PENDING_EVENTS_TIMEOUT_SECS / sleepTime;
+        for (int i = 0; 0 < openSpans.size() && i < maxAttempts ; ++i)
+        {
+            try
+            {
+                Thread.sleep(sleepTime);
+            }
+            catch (InterruptedException ex)
+            {
+            }
         }
     }
 }

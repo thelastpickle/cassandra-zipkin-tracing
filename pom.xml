@@ -15,17 +15,25 @@
         <dependency>
             <groupId>org.apache.cassandra</groupId>
             <artifactId>cassandra-all</artifactId>
-            <version>3.4</version>
+            <version>3.9</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.datastax.cassandra</groupId>
+            <artifactId>cassandra-driver-core</artifactId>
+            <!-- the version needs to match that which is supplied in the above version of Cassandra -->
+            <version>3.0.1</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.zipkin.brave</groupId>
             <artifactId>brave-core</artifactId>
-            <version>3.10.0</version>
+            <version>3.13.0</version>
         </dependency>
         <dependency>
             <groupId>io.zipkin.brave</groupId>
             <artifactId>brave-spancollector-http</artifactId>
-            <version>3.10.0</version>
+            <version>3.13.0</version>
         </dependency>
 
         <!-- tests -->
@@ -38,13 +46,7 @@
         <dependency>
             <groupId>io.zipkin.brave</groupId>
             <artifactId>brave-http</artifactId>
-            <version>3.10.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.datastax.cassandra</groupId>
-            <artifactId>cassandra-driver-core</artifactId>
-            <version>3.1.0</version>
+            <version>3.13.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -99,6 +101,24 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-dependency-plugin</artifactId>
+              <version>2.10</version>
+              <executions>
+                <execution>
+                  <id>copy-dependencies</id>
+                  <phase>package</phase>
+                  <goals>
+                    <goal>copy-dependencies</goal>
+                  </goals>
+                  <configuration>
+                      <outputDirectory>target</outputDirectory>
+                      <includeScope>runtime</includeScope>
+                  </configuration>
+                </execution>
+              </executions>
             </plugin>
         </plugins>
     </build>

@@ -36,6 +36,7 @@ public final class ZipkinTraceStateTest {
     @Test
     public void test_trace() {
         System.out.println("traceImpl");
+        System.setProperty("cassandra.storagedir", "target");
         System.setProperty("cassandra.custom_tracing_class", ZipkinTracing.class.getName());
         ZipkinTracing tracing = (ZipkinTracing) Tracing.instance;
 

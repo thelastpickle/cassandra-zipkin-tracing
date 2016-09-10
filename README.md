@@ -5,8 +5,7 @@ Cassandra-3.4 provides [pluggable tracing](http://www.planetcassandra.org/blog/c
 # Installation
 
     mvn install
-    cp target/cassandra-zipkin-tracing-*.jar $CASSANDRA_HOME/lib/
-    cp lib/*  $CASSANDRA_HOME/lib/
+    cp target/*.jar $CASSANDRA_HOME/lib/
 
 Then start Cassandra with
 

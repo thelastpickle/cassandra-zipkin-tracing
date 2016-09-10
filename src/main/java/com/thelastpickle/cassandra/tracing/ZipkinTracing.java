@@ -1,14 +1,14 @@
 
 package com.thelastpickle.cassandra.tracing;
 
+import com.datastax.driver.core.AtomicMonotonicTimestampGenerator;
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.ClientTracer;
 import com.github.kristofa.brave.EmptySpanCollectorMetricsHandler;
-import com.github.kristofa.brave.FixedSampleRateTraceFilter;
+import com.github.kristofa.brave.Sampler;
 import com.github.kristofa.brave.ServerTracer;
 import com.github.kristofa.brave.SpanCollector;
 import com.github.kristofa.brave.SpanId;
-import com.github.kristofa.brave.TraceFilter;
 import com.github.kristofa.brave.http.HttpSpanCollector;
 import com.google.common.collect.ImmutableMap;
 import com.twitter.zipkin.gen.Span;
@@ -18,16 +18,14 @@ import org.apache.cassandra.tracing.TraceState;
 import org.apache.cassandra.tracing.Tracing;
 import org.apache.cassandra.utils.FBUtilities;
 import org.apache.cassandra.utils.UUIDGen;
-import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
-import java.util.Collections;
+import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
-import java.util.List;
 
 public final class ZipkinTracing extends Tracing
 {
@@ -45,15 +43,15 @@ public final class ZipkinTracing extends Tracing
             = HttpSpanCollector.create(HTTP_COLLECTOR_URL, new EmptySpanCollectorMetricsHandler());
             //= KafkaSpanCollector.create("127.0.0.1:9092", new EmptySpanCollectorMetricsHandler());
 
+    private final Sampler SAMPLER = Sampler.ALWAYS_SAMPLE;
 
-    private final List<TraceFilter> traceFilters
-            // Sample rate = 1 means every request will get traced.
-            = Collections.singletonList(new FixedSampleRateTraceFilter(SAMPLE_RATE));
+    private final AtomicMonotonicTimestampGenerator TIMESTAMP_GENERATOR = new AtomicMonotonicTimestampGenerator();
 
     volatile Brave brave = new Brave
             .Builder( "c*:" + DatabaseDescriptor.getClusterName() + ":" + FBUtilities.getBroadcastAddress().getHostName())
             .spanCollector(spanCollector)
-            .traceFilters(traceFilters)
+            .traceSampler(SAMPLER)
+            .clock(() -> { return TIMESTAMP_GENERATOR.next(); })
             .build();
 
 
@@ -128,6 +126,7 @@ public final class ZipkinTracing extends Tracing
     {
         if (null != client)
             getServerTracer().submitBinaryAnnotation("client", client.toString());
+
         getServerTracer().submitBinaryAnnotation("request", request);
         return get();
     }
