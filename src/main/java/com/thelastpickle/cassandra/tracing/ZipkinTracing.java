@@ -1,4 +1,3 @@
-
 package com.thelastpickle.cassandra.tracing;
 
 import com.datastax.driver.core.AtomicMonotonicTimestampGenerator;
@@ -55,7 +54,7 @@ public final class ZipkinTracing extends Tracing
             if (SPAN_COLLECTOR_METHOD.equals("http")) {
               spanCollector = HttpSpanCollector.create(HTTP_COLLECTOR_URL, new EmptySpanCollectorMetricsHandler());
             } else {
-              spanCollector = KafkaSpanCollector.create("127.0.0.1:9092", new EmptySpanCollectorMetricsHandler());
+              spanCollector = KafkaSpanCollector.create(KAFKA_ADDRESS, new EmptySpanCollectorMetricsHandler());
             }
             
             brave = new Brave
