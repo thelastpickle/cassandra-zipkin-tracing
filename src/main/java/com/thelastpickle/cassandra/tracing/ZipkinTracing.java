@@ -1,4 +1,3 @@
-
 package com.thelastpickle.cassandra.tracing;
 
 import com.datastax.driver.core.AtomicMonotonicTimestampGenerator;
@@ -10,6 +9,7 @@ import com.github.kristofa.brave.ServerTracer;
 import com.github.kristofa.brave.SpanCollector;
 import com.github.kristofa.brave.SpanId;
 import com.github.kristofa.brave.http.HttpSpanCollector;
+import com.github.kristofa.brave.kafka.KafkaSpanCollector;
 import com.google.common.collect.ImmutableMap;
 import com.twitter.zipkin.gen.Span;
 import org.apache.cassandra.net.MessageIn;
@@ -37,26 +37,32 @@ public final class ZipkinTracing extends Tracing
 
     private static final String HTTP_SPAN_COLLECTOR_HOST = System.getProperty("ZipkinTracing.httpCollectorHost", "127.0.0.1");
     private static final String HTTP_SPAN_COLLECTOR_PORT = System.getProperty("ZipkinTracing.httpCollectorPort", "9411");
+    private static final String SPAN_COLLECTOR_METHOD = System.getProperty("ZipkinTracing.collectorMethod", "http");
     private static final String HTTP_COLLECTOR_URL = "http://" + HTTP_SPAN_COLLECTOR_HOST + ':' + HTTP_SPAN_COLLECTOR_PORT;
+    private static final String KAFKA_ADDRESS = System.getProperty("ZipkinTracing.kafkaCollectorAddress");
 
-    private final SpanCollector spanCollector
-            = HttpSpanCollector.create(HTTP_COLLECTOR_URL, new EmptySpanCollectorMetricsHandler());
-            //= KafkaSpanCollector.create("127.0.0.1:9092", new EmptySpanCollectorMetricsHandler());
+    private SpanCollector spanCollector;
 
     private final Sampler SAMPLER = Sampler.ALWAYS_SAMPLE;
 
     private final AtomicMonotonicTimestampGenerator TIMESTAMP_GENERATOR = new AtomicMonotonicTimestampGenerator();
 
-    volatile Brave brave = new Brave
+    volatile Brave brave;
+
+    public ZipkinTracing()
+    {
+            if (SPAN_COLLECTOR_METHOD.equals("http")) {
+              spanCollector = HttpSpanCollector.create(HTTP_COLLECTOR_URL, new EmptySpanCollectorMetricsHandler());
+            } else {
+              spanCollector = KafkaSpanCollector.create(KAFKA_ADDRESS, new EmptySpanCollectorMetricsHandler());
+            }
+            
+            brave = new Brave
             .Builder( "c*:" + DatabaseDescriptor.getClusterName() + ":" + FBUtilities.getBroadcastAddress().getHostName())
             .spanCollector(spanCollector)
             .traceSampler(SAMPLER)
             .clock(() -> { return TIMESTAMP_GENERATOR.next(); })
             .build();
-
-
-    public ZipkinTracing()
-    {
     }
 
     ClientTracer getClientTracer()
@@ -84,6 +90,7 @@ public final class ZipkinTracing extends Tracing
         {
             if (isValidHeaderLength(bb.limit()))
             {
+                logger.trace("Valid header length for customPayload in {}", ZIPKIN_TRACE_HEADERS);
                 extractAndSetSpan(bb.array(), traceType.name());
             }
             else
@@ -94,6 +101,7 @@ public final class ZipkinTracing extends Tracing
         }
         else
         {
+            logger.trace("No customPayload in {}", ZIPKIN_TRACE_HEADERS);
             getServerTracer().setStateUnknown(traceType.name());
         }
         return super.newSession(sessionId, traceType, customPayload);
@@ -143,6 +151,7 @@ public final class ZipkinTracing extends Tracing
         {
             if (isValidHeaderLength(bytes.length))
             {
+                logger.trace("valid headers extracting and setting span");
                 extractAndSetSpan(bytes, message.getMessageType().name());
             }
             else

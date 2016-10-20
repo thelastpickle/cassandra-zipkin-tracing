@@ -1,3 +1,5 @@
 /target/
 /nbproject/
 /presentation/tlp-reveal.js/nbproject/private/
+/.idea
+/*.iml
