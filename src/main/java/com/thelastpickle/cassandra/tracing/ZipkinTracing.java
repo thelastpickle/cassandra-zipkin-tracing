@@ -90,6 +90,7 @@ public final class ZipkinTracing extends Tracing
         {
             if (isValidHeaderLength(bb.limit()))
             {
+                logger.trace("Valid header length for customPayload in {}", ZIPKIN_TRACE_HEADERS);
                 extractAndSetSpan(bb.array(), traceType.name());
             }
             else
@@ -100,6 +101,7 @@ public final class ZipkinTracing extends Tracing
         }
         else
         {
+            logger.trace("No customPayload in {}", ZIPKIN_TRACE_HEADERS);
             getServerTracer().setStateUnknown(traceType.name());
         }
         return super.newSession(sessionId, traceType, customPayload);
@@ -149,6 +151,7 @@ public final class ZipkinTracing extends Tracing
         {
             if (isValidHeaderLength(bytes.length))
             {
+                logger.trace("valid headers extracting and setting span");
                 extractAndSetSpan(bytes, message.getMessageType().name());
             }
             else
