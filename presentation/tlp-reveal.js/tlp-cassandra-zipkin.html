@@ -6,7 +6,7 @@
 
 		<title>Zipkin Tracing with Apache Cassandra – The Last Pickle</title>
 
-		<meta name="description" content="Apache Cassandra positioned as the data platform de jure for the next evolution of software service amidst an enterprise moving ever towards microservices and BASE architectures the missing piece for many is tracing and profiling difficult to reproduce problems.">
+		<meta name="description" content="Apache Cassandra – the data platform de jure for the next evolution of software service amidst an enterprise moving ever towards microservices and BASE architectures.">
 
 		<meta name="author" content="Mick Semb Wever – The Last Pickle">
 		<meta name="license" content="Creative Commons Attribution-NonCommercial 3.0">
@@ -44,21 +44,21 @@
 			<div class="slides">
                 <section>
                     <section >
-                        <h2>Zipkin Tracing<br/>Apache Cassandra</h2>
+                        <h3>The Network, The Kingmaker<br/>Distributed Tracing and Zipkin</h3>
                         <img src="tlp/TLP_mick.png" />
                     </section>
                     <section >
                         <h3 style="text-align: left;">About The Last Pickle</h3>
-                        <h4><br/>
+                        <p><br/>
                             We help people deliver and improve<br/>
-                            Apache Cassandra based solutions<br/><br/></h4>
-                            <h4>Based in<br/> USA, New Zealand, Australia, France, London</h4><br/>
-                        50+ years combined Cassandra experience.
+                            Apache Cassandra based solutions<br/><br/></p>
+                            <h4>Based in<br/> USA, New Zealand, Australia, France, Sweden</h4><br/>
+                            50+ years combined Cassandra experience.
                     </section>
                     <section><br/>
-                        <p>distributed tracing</p>
-                        <p>zipkin</p>
-                        <p>zipkin & cassandra</p>
+                        <p>Distributed Tracing</p>
+                        <p>Zipkin 2</p>
+                        <p>Zipkin & Cassandra</p>
                     </section>
                 </section>
 
@@ -66,8 +66,8 @@
 				    <section>
 					    <h2>Scaling Data & People</h2>
 					    <p>
-                            Apache Cassandra<br/>data platform de jure<br/>
-						    microservices, base, and lambda architectures
+                            <br/>
+						    MicroServices, BASE, and lambda architectures
 					    </p>
 					    <p>
     					    <img data-src="microservices.png" width="400" />
@@ -112,6 +112,11 @@ java -jar ./zipkin-server/target/zipkin-server-*exec.jar
                         <br/>
 					    <img data-src="Screenshot-zipkin-search-0.png" />
 				    </section>
+				    <section>
+					    <h6>search traces</h6>
+                        <br/>
+					    <img data-src="Screenshot-zipkin-search-1.png" />
+				    </section>
 				    <section data-background-size="100%" data-background="Screenshot-zipkin-search-1.png"  data-background-transition="zoom">
 				    </section>
 				    <section>
@@ -129,11 +134,9 @@ java -jar ./zipkin-server/target/zipkin-server-*exec.jar
 				    <section>
 					    <h6>platform call graph</h6>
                         <br/>
-					    <img data-src="zipkin-graph.png" />
+					    <img data-src="zipkin-graph-2.png" />
 				    </section>
 				    <section data-background-size="100%" data-background="zipkin-graph-1.png"  data-background-transition="zoom">
-				    </section>
-				    <section data-background-size="100%" data-background="zipkin-graph-2.png"  data-background-transition="zoom">
 				    </section>
 			    </section>
 			    <section >
@@ -149,9 +152,9 @@ java -jar ./zipkin-server/target/zipkin-server-*exec.jar
 				    </section>
 				    <section data-background-size="100%" data-background="architecture-0.png" >
 				    </section>
-				    <section data-transition="none">
-                        <h4>Existing instrumentations</h4>
-                        <table width="100%"><tr ><td ><img data-src="zipkin-instrumentations.png"></td></tr></table>
+				    <section data-background-size="66%" data-background="architecture-1.png" >
+				    </section>
+				    <section data-background-size="90%" data-background="zipkin-instrumentations.png" >
 				    </section>
 			    </section>
 			    <section >
@@ -169,80 +172,50 @@ java -jar ./zipkin-server/target/zipkin-server-*exec.jar
                         <br/>
                         <p style="font-size: 60%"></p>
 				    </section>
-				    <section ><img data-src="zipkin-logo.png" width="10%"><br/><br/>
-                        <h4>simple c* call</h4>
-                        <br/><br/>
-                        <table width="100%" ><tr ><td ><img data-src="simple-no-trace-cassandra.png" ></td></tr></table>
-				    </section>
 				    <section data-transition="none"><img data-src="zipkin-logo.png" width="10%"><br/><br/>
-                        <h4>simple c* call</h4>
+                        <h4>continuing a trace… (in-process)</h4>
                         <br/>
-                        <table width="100%" ><tr ><td ><img data-src="simple-cs-cr-cassandra.png" ></td></tr></table>
+                        <table width="100%"><tr ><td ><img data-src="simple-cs-cr-continued.png"></td></tr></table>
+                        <br/>
+                        <p style="font-size: 60%"></p>
 				    </section>
 				    <section ><img data-src="zipkin-logo.png" width="10%"><br/><br/>
                         <h4>http call passing through headers</h4>
                         <br/>
                         <table ><tr ><td ><img data-src="cs-cr-with-headers.png" ></td></tr></table>
 				    </section>
-                </section>
-			    <section >
-				    <section><img data-src="open_tracing.png" width="40%">
+				    <section ><img data-src="zipkin-logo.png" width="10%"><br/><br/>
+                        <h4>continuing the trace… (x-process)</h4>
+                        <br/><br/>
+                        <table ><tr ><td ><img data-src="cs-cr-with-headers-extract.png" ></td></tr></table>
 				    </section>
-				    <section><img data-src="open_tracing.png" width="10%"><br/><br/>
-                        <h4>simple http call</h4>
+				    <section >
+                        <h4>one way tracing</h4>
                         <br/>
-                        <table width="100%"><tr ><td ><img data-src="simple-no-trace.png"></td></tr></table>
-                        <p style="font-size: 50%">[ opentracing – https://github.com/opentracing/opentracing-java ]</p>
-
+                        <table ><tr ><td ><img data-src="one-way-tracing.png" ></td></tr></table>
 				    </section>
-				    <section data-transition="none"><img data-src="open_tracing.png" width="10%"><br/><br/>
-                        <h4>simple http call</h4>
+				    <section >
+                        <h4>custom tags</h4>
                         <br/>
-                        <table width="100%"><tr ><td ><img data-src="simple-opentracing.png"></td></tr></table>
-                        <p style="font-size: 50%"><br/></p>
-				    </section>
-				    <section><img data-src="open_tracing.png" width="10%"><br/><br/>
-                        <h4>simple c* call</h4>
-                        <br/>
-                        <table width="100%" ><tr ><td ><img data-src="simple-no-trace-cassandra.png" ></td></tr></table>
-				    </section>
-				    <section data-transition="none"><img data-src="open_tracing.png" width="10%"><br/><br/>
-                        <h4>simple c* call</h4>
-                        <br/>
-                        <table width="100%" ><tr ><td ><img data-src="simple-opentracing-cassandra.png" ></td></tr></table>
-				    </section>
-				    <section ><img data-src="open_tracing.png" width="10%"><br/><br/>
-                        <h4>http call passing through headers</h4>
-                        <br/>
-                        <table ><tr ><td ><img data-src="opentracing-with-headers.png" ></td></tr></table>
+                        <table ><tr ><td ><img data-src="custom-tags.png" ></td></tr></table>
 				    </section>
                 </section>
 
                 <section>
 				    <section>
 					    <h2>Tracing in C*</h2>
+					    <img data-src="cassandra-reads-writes.png" width="500"/>
+				    </section>
+				    <section>
+					    <h2>Tracing in C*</h2>
 					    <img data-src="Screenshot-CASSANDRA-1123.png" />
 				    </section>
 				    <section data-background-size="100%" data-background="c-tracing.png" data-background-transition="zoom">
 				    </section>
-				    <!--section>
-                        <pre><code>    CO-ORDINATOR NODE                    REPLICA NODE
-
-
- --&gt;
-    newSession(..)
-        begin(..)
-        trace(..)
-        trace(..)
-                                    --&gt; initialiseMessage(..)
-                                            trace(..)
-                                            trace(..)
-                                    &lt;--
-        trace(..)
-    stopSession(..)
- &lt;--
-                        </code></pre>
-				    </section-->
+				    <section>
+					    <h2>Tracing in C*</h2>
+					    <img data-src="cassandra-reads-writes.png" width="500"/>
+				    </section>
                 </section>
 
                 <section>
@@ -256,24 +229,25 @@ java -jar ./zipkin-server/target/zipkin-server-*exec.jar
                             <li>zero tracing overhead</li>
                         </ul>
 				    </section>
-                    <section >
-                            <p>Cassandra-3.4</p>
+                      <section >
+                            <p class="fragment fade-out">Cassandra-3.4</p>
+                            <br/>
+                            <p class="fragment">Cassandra-3.11.0</p>
 				    </section>
 
 				    <section><img data-src="zipkin-logo.png" width="10%">
                         <h4>Download Cassandra-Zipkin-Tracing</h4>
                         <pre><code>
- git clone git@github.com:thelastpickle/cassandra-zipkin-tracing
+ git clone git@github.com:openzipkin/brave-cassandra.git
 
  mvn install
- cp target/cassandra-zipkin-tracing-*.jar $CASSANDRA_HOME/lib/
- cp lib/*  $CASSANDRA_HOME/lib/
+
+ cp cassandra/target/brave-instrumentation-cassandra-*-all.jar \
+     $CASSANDRA_HOME/lib/
 </code></pre>
                         <br/><br/>
                         then run, enabling zipkin tracing
-                        <pre><code style="font-size: 80%;">JVM_OPTS= \
-  "-Dcassandra.custom_tracing_class=com.thelastpickle.cassandra.tracing.ZipkinTracing" \
-  bin/cassandra</code></pre>
+                        <pre><code style="font-size: 80%;">JVM_OPTS="-Dcassandra.custom_tracing_class=brave.cassandra.Tracing"   cassandra</code></pre>
 				    </section>
 
                     <section >
@@ -342,6 +316,11 @@ java -jar ./zipkin-server/target/zipkin-server-*exec.jar
                         <br/>
                         <table width="100%"><tr ><td ><img data-src="cs-cr-with-payload-cassandra.png" ></td></tr></table>
 				    </section>
+				    <section data-transition="none">
+                        <h4>c* call using custom payload</h4>
+                        <br/>
+                        <table width="100%"><tr ><td ><img data-src="brave-cassandra.png" ></td></tr></table>
+				    </section>
 				    <section >
                         <br/><br/>
                         enable zipkin tracing <em>and</em> the custom payload handler
@@ -369,34 +348,17 @@ java -jar ./zipkin-server/target/zipkin-server-*exec.jar
                 </section>
 
                 <section>
-                  <section data-background-transition="zoom">
-                              <h4>Zipkin  on  Cassandra-3.9</h4>
-                              <img data-src="Screenshot-zipkin-search-1.png" width="60%">
-                  </section>
-                  <section>
-                    <h6>so much awesomeness</h6>
-                              <br/>
-                              <ul><li>UDT</li><li>MATERIALIZED VIEW</li><li>SASI</li><li>TimeWindowCompactionStrategy</li></ul>
-                  </section>
-                  <section>
-                    <h6>so much awesomeness</h6>
-                              <br/>
-                    7 Tables --> 2 Tables<br/>
-                    1.5k LOC removed<br/>
-                    Performance!<br/>
-                  </section>
-                </section>
-
-                <section>
                     <section >
                         <h3>Thanks</h3>
                             <ul>
                               <li style="font-size: 60%;">Zipkin &nbsp;&nbsp;&nbsp;&nbsp;– <a href="https://github.com/openzipkin/zipkin">github.com/openzipkin/zipkin</a></li>
+                                <br/>
                                 <li style="font-size: 60%;">Brave (zipkin java instrumentation)
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;– <a href="https://github.com/openzipkin/brave">openzipkin-brave</a></li>
-                                <li style="font-size: 60%;">OpenTracing (agnostic instrumentation)&nbsp;
-                                    – <a href="https://github.com/openzipkin/brave-opentracing">opentracing-zipkin</a></li><br/>
-                                <li style="font-size: 60%;">Zipkin Cassandra implementation (& this presentation)
+                                    &nbsp;&nbsp;&nbsp;– <a href="https://github.com/openzipkin/brave">openzipkin-brave</a></li>
+                                <li style="font-size: 60%;">Zipkin/Brave Cassandra library
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;– <a href="https://github.com/openzipkin/brave-cassandra">brave-cassandra</a></li>
+                                <br/>
+                                <li style="font-size: 60%;">This presentation
                                     <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;– <a href="https://github.com/thelastpickle/cassandra-zipkin-tracing">github.com/thelastpickle/cassandra-zipkin-tracing</a></li>
                             </ul><img src="tlp/TLP_mick.png" width="700"/>
                     </section>
