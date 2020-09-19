@@ -120,6 +120,49 @@
                 </execution>
               </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                  <execution>
+                    <id>integration-tests-setup</id>
+                    <phase>pre-integration-test</phase>
+                    <goals>
+                      <goal>exec</goal>
+                    </goals>
+                    <configuration>
+                      <executable>make</executable>
+                      <arguments>setup</arguments>
+                      <workingDirectory>src/integration/resources</workingDirectory>
+                    </configuration>
+                  </execution>
+                  <execution>
+                    <id>integration-tests</id>
+                    <phase>integration-test</phase>
+                    <goals>
+                      <goal>exec</goal>
+                    </goals>
+                    <configuration>
+                      <executable>make</executable>
+                      <arguments>test</arguments>
+                      <workingDirectory>src/integration/resources</workingDirectory>
+                    </configuration>
+                  </execution>
+                  <execution>
+                    <id>integration-tests-teardown</id>
+                    <phase>post-integration-test</phase>
+                    <goals>
+                      <goal>exec</goal>
+                    </goals>
+                    <configuration>
+                      <executable>make</executable>
+                      <arguments>teardown</arguments>
+                      <workingDirectory>src/integration/resources</workingDirectory>
+                    </configuration>
+                  </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
