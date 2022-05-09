@@ -21,10 +21,10 @@ import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.ServerSpan;
 import com.twitter.zipkin.gen.Annotation;
 import com.twitter.zipkin.gen.Span;
+import org.apache.cassandra.locator.InetAddressAndPort;
 import org.apache.cassandra.tracing.TraceState;
 import org.apache.cassandra.tracing.Tracing;
 
-import java.net.InetAddress;
 import java.util.Deque;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -49,7 +49,7 @@ final class ZipkinTraceState extends TraceState
 
     public ZipkinTraceState(
             Brave brave,
-            InetAddress coordinator,
+            InetAddressAndPort coordinator,
             UUID sessionId,
             Tracing.TraceType traceType,
             ServerSpan serverSpan)
