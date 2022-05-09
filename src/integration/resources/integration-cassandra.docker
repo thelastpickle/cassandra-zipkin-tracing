@@ -1,10 +1,13 @@
-FROM cassandra:3.11.8
+FROM cassandra:4.0.7
 
-RUN apt-get update && apt-get install -y wait-for-it
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y wait-for-it netcat
 
 ENV NOTVISIBLE "in users profile"
 RUN echo "export VISIBLE=now" >> /etc/profile
 
+ENV MAX_HEAP_SIZE 500M
+ENV HEAP_NEWSIZE 100M
 
 ENV CASSANDRA_HOME /opt/cassandra
 ENV CASSANDRA_CONF /etc/cassandra
@@ -15,9 +18,9 @@ RUN sed -i '1s;^;export PATH=/opt/cassandra/bin:$PATH\n;' /etc/bash.bashrc
 RUN sed -i '1s;^;export JAVA_HOME=/opt/java/openjdk\n;' /etc/bash.bashrc
 
 # install cassandra-zipkin-tracing
-RUN echo "# cassandra-zipkin-tracing" >> $CASSANDRA_CONF/jvm.options
-RUN echo "-Dcassandra.custom_tracing_class=com.thelastpickle.cassandra.tracing.ZipkinTracing" >> $CASSANDRA_CONF/jvm.options
-RUN echo "-DZipkinTracing.httpCollectorHost=zipkin-0" >> $CASSANDRA_CONF/jvm.options
+RUN echo "# cassandra-zipkin-tracing" >> $CASSANDRA_CONF/jvm-server.options
+RUN echo "-Dcassandra.custom_tracing_class=com.thelastpickle.cassandra.tracing.ZipkinTracing" >> $CASSANDRA_CONF/jvm-server.options
+RUN echo "-DZipkinTracing.httpCollectorHost=zipkin-0" >> $CASSANDRA_CONF/jvm-server.options
 
 
 EXPOSE 22

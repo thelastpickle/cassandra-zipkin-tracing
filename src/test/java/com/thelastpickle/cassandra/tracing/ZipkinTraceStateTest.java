@@ -19,7 +19,8 @@ import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
 import io.opentracing.propagation.Format;
-import org.apache.cassandra.net.MessageOut;
+import org.apache.cassandra.config.DatabaseDescriptor;
+import org.apache.cassandra.net.Message;
 import org.apache.cassandra.net.MessagingService;
 import org.apache.cassandra.tracing.Tracing;
 import org.apache.cassandra.utils.FBUtilities;
@@ -29,14 +30,18 @@ import org.apache.http.HttpRequest;
 import org.junit.Test;
 
 import static java.util.Collections.singletonMap;
+import org.apache.cassandra.net.Verb;
 
 
 public final class ZipkinTraceStateTest {
 
     @Test
     public void test_trace() {
-        System.out.println("traceImpl");
+        System.out.println("test_trace");
+
+        System.setProperty("cassandra.config", "file:///" + System.getProperty("basedir") + "/target/test-classes/cassandra.yaml");
         System.setProperty("cassandra.storagedir", "target");
+        DatabaseDescriptor.daemonInitialization();
         System.setProperty("cassandra.custom_tracing_class", ZipkinTracing.class.getName());
         ZipkinTracing tracing = (ZipkinTracing) Tracing.instance;
 
@@ -52,7 +57,7 @@ public final class ZipkinTraceStateTest {
         assert null != tracing.get();
         ZipkinTraceState state = (ZipkinTraceState) tracing.begin("begin-test", Collections.emptyMap());
         assert state.sessionId == sessionId;
-        assert FBUtilities.getLocalAddress().equals(state.coordinator);
+        assert FBUtilities.getLocalAddressAndPort().equals(state.coordinator);
         assert Tracing.TraceType.QUERY == state.traceType;
         Tracing.trace("test-0");
         assert 1 == state.openSpans.size();
@@ -63,9 +68,9 @@ public final class ZipkinTraceStateTest {
         Tracing.trace("test-2");
         assert 1 == state.openSpans.size();
         assert state.openSpans.getFirst().getName().startsWith("test-2");
-        MessageOut msg = new MessageOut(MessagingService.Verb.READ);
-        assert msg.parameters.containsKey(ZipkinTracing.ZIPKIN_TRACE_HEADERS);
-        byte[] bytes = (byte[]) msg.parameters.get(ZipkinTracing.ZIPKIN_TRACE_HEADERS);
+        Message msg = Message.out(Verb.READ_REQ, new Object());
+        assert msg.header.customParams().containsKey(ZipkinTracing.ZIPKIN_TRACE_HEADERS);
+        byte[] bytes = msg.header.customParams().get(ZipkinTracing.ZIPKIN_TRACE_HEADERS);
         assert 32 == bytes.length;
         SpanId spanId = SpanId.fromBytes(bytes);
         assert state.openSpans.getFirst().getTrace_id() == spanId.traceId;

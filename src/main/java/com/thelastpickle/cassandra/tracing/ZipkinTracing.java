@@ -26,10 +26,11 @@ import com.github.kristofa.brave.ServerTracer;
 import com.github.kristofa.brave.SpanCollector;
 import com.github.kristofa.brave.SpanId;
 import com.github.kristofa.brave.http.HttpSpanCollector;
-import com.google.common.collect.ImmutableMap;
 import com.twitter.zipkin.gen.Span;
-import org.apache.cassandra.net.MessageIn;
+import org.apache.cassandra.net.Message;
+import org.apache.cassandra.net.ParamType;
 import org.apache.cassandra.config.DatabaseDescriptor;
+import org.apache.cassandra.locator.InetAddressAndPort;
 import org.apache.cassandra.tracing.TraceState;
 import org.apache.cassandra.tracing.Tracing;
 import org.apache.cassandra.utils.FBUtilities;
@@ -40,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -64,7 +66,7 @@ public final class ZipkinTracing extends Tracing
     private final AtomicMonotonicTimestampGenerator TIMESTAMP_GENERATOR = new AtomicMonotonicTimestampGenerator();
 
     volatile Brave brave = new Brave
-            .Builder( "c*:" + DatabaseDescriptor.getClusterName() + ":" + FBUtilities.getBroadcastAddress().getHostName())
+            .Builder( "c*:" + DatabaseDescriptor.getClusterName() + ":" + FBUtilities.getJustBroadcastAddress().getHostName())
             .spanCollector(spanCollector)
             .traceSampler(SAMPLER)
             .clock(() -> { return TIMESTAMP_GENERATOR.next(); })
@@ -148,9 +150,11 @@ public final class ZipkinTracing extends Tracing
     }
 
     @Override
-    public TraceState initializeFromMessage(final MessageIn<?> message)
+    public TraceState initializeFromMessage(Message.Header header)
     {
-        byte [] bytes = message.parameters.get(ZIPKIN_TRACE_HEADERS);
+        byte [] bytes = null != header.customParams()
+                ? header.customParams().get(ZIPKIN_TRACE_HEADERS)
+                : null;
 
         assert null == bytes || isValidHeaderLength(bytes.length)
                 : "invalid customPayload in " + ZIPKIN_TRACE_HEADERS;
@@ -159,14 +163,14 @@ public final class ZipkinTracing extends Tracing
         {
             if (isValidHeaderLength(bytes.length))
             {
-                extractAndSetSpan(bytes, message.getMessageType().name());
+                extractAndSetSpan(bytes, header.verb.toString());
             }
             else
             {
                 logger.error("invalid customPayload in {}", ZIPKIN_TRACE_HEADERS);
             }
         }
-        return super.initializeFromMessage(message);
+        return super.initializeFromMessage(header);
     }
 
     private void extractAndSetSpan(byte[] bytes, String name) {
@@ -178,7 +182,7 @@ public final class ZipkinTracing extends Tracing
         }
         else
         {
-            // deprecated aproach
+            // deprecated approach
             ByteBuffer bb = ByteBuffer.wrap(bytes);
 
             getServerTracer().setStateCurrentTrace(
@@ -190,7 +194,7 @@ public final class ZipkinTracing extends Tracing
     }
 
     @Override
-    public Map<String, byte[]> getTraceHeaders()
+    public Map<ParamType, Object> addTraceHeaders(Map<ParamType, Object> addToMutable)
     {
         assert isTracing();
         Span span = brave.clientSpanThreadBinder().getCurrentClientSpan();
@@ -201,10 +205,11 @@ public final class ZipkinTracing extends Tracing
                 .spanId(span.getId())
                 .build();
 
-        return ImmutableMap.<String, byte[]>builder()
-                .putAll(super.getTraceHeaders())
-                .put(ZIPKIN_TRACE_HEADERS, spanId.bytes())
-                .build();
+        addToMutable.put(
+                ParamType.CUSTOM_MAP,
+                new HashMap<String,byte[]>() {{ put(ZIPKIN_TRACE_HEADERS, spanId.bytes()); }});
+
+        return super.addTraceHeaders(addToMutable);
     }
 
     @Override
@@ -216,7 +221,7 @@ public final class ZipkinTracing extends Tracing
     }
 
     @Override
-    protected TraceState newTraceState(InetAddress coordinator, UUID sessionId, TraceType traceType)
+    protected TraceState newTraceState(InetAddressAndPort coordinator, UUID sessionId, TraceType traceType)
     {
         getServerTracer().setServerReceived();
         getServerTracer().submitBinaryAnnotation("sessionId", sessionId.toString());
