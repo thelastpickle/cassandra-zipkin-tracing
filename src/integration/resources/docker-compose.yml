@@ -18,7 +18,6 @@ services:
         CASSANDRA_CLUSTER_NAME: cluster1
         CASSANDRA_DC: dc1
         CASSANDRA_RACK: r1
-        CASSANDRA_NUM_TOKENS: 16
     volumes:
          - ../../../.:/cassandra-zipkin-tracing
     healthcheck:
@@ -41,7 +40,6 @@ services:
         CASSANDRA_CLUSTER_NAME: cluster1
         CASSANDRA_DC: dc1
         CASSANDRA_RACK: r2
-        CASSANDRA_NUM_TOKENS: 16
         CASSANDRA_WAIT_ON: cassandra-00
         JVM_EXTRA_OPTS: '-Dcassandra.consistent.rangemovement=false -Dcassandra.ring_delay_ms=2000'
     volumes:
@@ -66,7 +64,6 @@ services:
 #       CASSANDRA_CLUSTER_NAME: cluster1
 #       CASSANDRA_DC: dc2
 #       CASSANDRA_RACK: r1
-#       CASSANDRA_NUM_TOKENS: 16
 #       CASSANDRA_WAIT_ON: cassandra-00
 #       JVM_EXTRA_OPTS: '-Dcassandra.consistent.rangemovement=false -Dcassandra.ring_delay_ms=2000'
 #    volumes:

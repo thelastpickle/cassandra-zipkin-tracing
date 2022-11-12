@@ -3,6 +3,7 @@ all: setup test teardown
 	
 
 test:
+	docker exec -t cassandra-zipkin-tracing-tests_cassandra-01_1 nodetool status
 	docker exec -t cassandra-zipkin-tracing-tests_cassandra-00_1 cqlsh -e "create keyspace test WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};"
 	sleep 2
 	docker exec -t cassandra-zipkin-tracing-tests_cassandra-00_1 cqlsh -e "create table test.test (one text primary key, two text);"
